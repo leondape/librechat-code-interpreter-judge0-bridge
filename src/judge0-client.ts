@@ -62,9 +62,13 @@ export class Judge0Client {
   ): Promise<ExecResponse> {
     const storage = getStorage();
     
+    // Translate LibreChat's /mnt/data/ paths to relative paths
+    // LibreChat's prompt tells AI files are at /mnt/data/, but Judge0 uses current directory
+    const translatedCode = code.replace(/\/mnt\/data\//g, './');
+    
     // Prepare the submission request
     const languageId = getJudge0LanguageId(lang);
-    const sourceCode = encodeBase64(code);
+    const sourceCode = encodeBase64(translatedCode);
     
     const request: Judge0SubmissionRequest = {
       source_code: sourceCode,
