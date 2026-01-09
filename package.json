@@ -1,0 +1,45 @@
+{
+  "name": "judge0-librechat-bridge",
+  "version": "1.0.0",
+  "description": "Stateful proxy service bridging LibreChat Code Interpreter API with Judge0 CE",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "tsx scripts/test-bridge.ts"
+  },
+  "keywords": [
+    "judge0",
+    "librechat",
+    "code-execution",
+    "proxy"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mime-types": "^2.1.35",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/mime-types": "^2.1.4",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.10.5",
+    "@types/uuid": "^10.0.0",
+    "form-data": "^4.0.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
