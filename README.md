@@ -1,15 +1,20 @@
 # Judge0-LibreChat Bridge
 
-A stateful proxy service that bridges LibreChat's Code Interpreter API with Judge0 CE's stateless execution API.
+A stateful proxy service that bridges LibreChat's Code Interpreter API with Judge0's stateless execution API.
 
 ## Overview
 
-LibreChat expects a stateful code execution API with persistent sessions and file management, but Judge0 CE is stateless per-submission. This bridge handles:
+LibreChat expects a stateful code execution API with persistent sessions and file management, but Judge0 is stateless per-submission. This bridge handles:
 
 - **Session Management**: Creates and manages sessions with configurable TTL (default 24 hours)
 - **File Storage**: Stores uploaded files and execution output files
 - **API Translation**: Translates between LibreChat and Judge0 request/response formats
 - **ZIP Handling**: Manages `additional_files` and `post_execution_filesystem` ZIP encoding
+
+## Prerequisites
+
+- Node.js 18+
+- Judge0 API (see [File Output Support](#file-output-support) for limitations)
 
 ## Quick Start
 
@@ -172,12 +177,26 @@ LIBRECHAT_CODE_BASEURL=https://bridge.yourdomain.com
 LIBRECHAT_CODE_API_KEY=your-secret-key
 ```
 
+## File Output Support
+
+This bridge uses `post_execution_filesystem` to retrieve files created during code execution (e.g., matplotlib graphs, generated CSVs).
+
+**Important limitation:** This feature currently only works with the **public hosted Judge0 API** (v1.14.0), not with self-hosted instances.
+
+| Judge0 Instance | Version | File Output (`post_execution_filesystem`) |
+|-----------------|---------|-------------------------------------------|
+| `https://ce.judge0.com` | 1.14.0 | ✅ Supported |
+| `https://extra-ce.judge0.com` | 1.14.0 | ✅ Supported |
+| Self-hosted (open-source) | 1.13.1 | ❌ Not available |
+
+The latest open-source release is v1.13.1 which does not include this feature. Code execution works, but output files cannot be retrieved. The bridge is made to work with files (without its not much useful) so as is you cannot use it with self hosted.
+
 ## Architecture
 
 ```
 ┌─────────────┐     ┌───────────────────────────┐     ┌─────────────┐
 │  LibreChat  │────▶│    Judge0-LibreChat      │────▶│   Judge0    │
-│             │◀────│         Bridge            │◀────│     CE      │
+│             │◀────│         Bridge            │◀────│     API     │
 └─────────────┘     │                           │     └─────────────┘
                     │  ┌─────────────────────┐  │
                     │  │   Session Storage   │  │
@@ -204,7 +223,6 @@ npm run test
 
 ## Security Notes
 
-- Use Judge0 CE v1.13.1+ (patches CVE-2024-28189, CVE-2024-29021)
 - Set `LIBRECHAT_CODE_API_KEY` in production
 - Judge0's sandbox handles path traversal protection
 - Errors from Judge0 pass through to the client
