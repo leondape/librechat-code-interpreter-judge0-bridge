@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import type { Session, StoredFile, SessionStorage } from './types';
 import { config } from './config';
 
@@ -19,7 +19,7 @@ export class MemoryStorage implements SessionStorage {
    * Create a new session and return its ID
    */
   createSession(): string {
-    const id = uuidv4();
+    const id = nanoid();
     const now = new Date();
     
     const session: Session = {
@@ -73,7 +73,7 @@ export class MemoryStorage implements SessionStorage {
       this.sessions.set(sessionId, session);
     }
     
-    const fileId = uuidv4();
+    const fileId = nanoid();
     const storedFile: StoredFile = {
       id: fileId,
       name,
