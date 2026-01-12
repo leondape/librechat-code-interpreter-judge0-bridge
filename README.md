@@ -1,6 +1,7 @@
 # Judge0-LibreChat Bridge
 
-A stateful proxy service that bridges LibreChat's Code Interpreter API with Judge0's stateless execution API.
+A stateful proxy service that bridges LibreChat's Code Interpreter API with Judge0's stateless execution API.  
+This is work in Progress but fully works. As far as I see it the bridge brings full feature parity to LibreChat Code interpreter API. Redis is very wip and not yet tested.
 
 ## Overview
 
@@ -14,7 +15,7 @@ LibreChat expects a stateful code execution API with persistent sessions and fil
 ## Prerequisites
 
 - Node.js 18+
-- Judge0 API (see [File Output Support](#file-output-support) for limitations)
+- Judge0 API >=v1.14 (see [File Output Support](#file-output-support) for limitations)
 
 ## Quick Start
 
@@ -179,17 +180,14 @@ LIBRECHAT_CODE_API_KEY=your-secret-key
 
 ## File Output Support
 
-This bridge uses `post_execution_filesystem` to retrieve files created during code execution (e.g., matplotlib graphs, generated CSVs).
-
-**Important limitation:** This feature currently only works with the **public hosted Judge0 API** (v1.14.0), not with self-hosted instances.
-
 | Judge0 Instance | Version | File Output (`post_execution_filesystem`) |
 |-----------------|---------|-------------------------------------------|
 | `https://ce.judge0.com` | 1.14.0 | ✅ Supported |
 | `https://extra-ce.judge0.com` | 1.14.0 | ✅ Supported |
 | Self-hosted (open-source) | 1.13.1 | ❌ Not available |
 
-The latest open-source release is v1.13.1 which does not include this feature. Code execution works, but output files cannot be retrieved. The bridge is made to work with files (without its not much useful) so as is you cannot use it with self hosted.
+This bridge uses `post_execution_filesystem` to retrieve files created during code execution (e.g., matplotlib graphs, generated CSVs). This is very much needed for LibreChat parity as it has vast file support. Therefore the bridge will not support lower Judge0 versions without file support.  
+Currently self-hosted images (<v1.14) do not support `post_execution_filesystem` so it only works with hosted. But this is only the case until v1.14.0 is released.  
 
 ## Architecture
 
