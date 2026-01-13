@@ -62,9 +62,15 @@ export class Judge0Client {
   ): Promise<ExecResponse> {
     const storage = getStorage();
     
-    // Translate LibreChat's /mnt/data/ paths to relative paths
+    // Translate LibreChat's /mnt/data paths to relative paths
     // LibreChat's prompt tells AI files are at /mnt/data/, but Judge0 uses current directory
-    const translatedCode = code.replace(/\/mnt\/data\//g, './');
+    // Use negative lookbehind (?<!\.) to prevent path traversal (./mnt/data -> .. would escape sandbox)
+    const pathPattern = /(?<!\.)\/mnt\/data(\/|(?=\b))/g;
+    const pathTranslationOccurred = pathPattern.test(code);
+    // Reset regex lastIndex after test() since we use /g flag
+    pathPattern.lastIndex = 0;
+    let translatedCode = code.replace(/(?<!\.)\/mnt\/data\//g, './');
+    translatedCode = translatedCode.replace(/(?<!\.)\/mnt\/data\b/g, '.');
     
     // Prepare the submission request
     const languageId = getJudge0LanguageId(lang);
@@ -113,7 +119,7 @@ export class Judge0Client {
         { headers: this.getHeaders() }
       );
 
-      return await this.translateResponse(response.data, inputFileNames);
+      return await this.translateResponse(response.data, inputFileNames, pathTranslationOccurred);
     } catch (error) {
       return await this.handleError(error);
     }
@@ -122,20 +128,21 @@ export class Judge0Client {
   /**
    * Translate Judge0 response to LibreChat format
    */
-  private async translateResponse(j0Response: Judge0SubmissionResponse, inputFileNames: string[] = []): Promise<ExecResponse> {
+  private async translateResponse(j0Response: Judge0SubmissionResponse, inputFileNames: string[] = [], pathTranslationOccurred: boolean = false): Promise<ExecResponse> {
     const storage = getStorage();
     const statusId = j0Response.status?.id;
     
     // Create a new session for output files
     const sessionId = await storage.createSession();
     
-    let stdout = '';
+    // Add FYI message if path translation occurred
+    let stdout = pathTranslationOccurred ? 'FYI: judge0-bridge replaces /mnt/data to ./\n\n' : '';
     let stderr = '';
     const outputFiles: Array<{ id: string; name: string }> = [];
 
-    // Decode stdout
+    // Decode stdout (append to FYI message if present)
     if (j0Response.stdout) {
-      stdout = decodeBase64(j0Response.stdout);
+      stdout += decodeBase64(j0Response.stdout);
     }
 
     // Handle different status codes
