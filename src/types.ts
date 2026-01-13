@@ -160,16 +160,18 @@ export interface Session {
 }
 
 /**
- * Storage interface for session/file management
+ * Storage interface for session/file management (async)
  */
 export interface SessionStorage {
-  createSession(): string;
-  getSession(sessionId: string): Session | null;
-  addFile(sessionId: string, name: string, data: Buffer): string;
-  getFile(sessionId: string, fileId: string): StoredFile | null;
-  listFiles(sessionId: string): Array<{ id: string; name: string; size: number; lastModified: string }>;
-  isSessionValid(sessionId: string): boolean;
-  cleanup(): void;
+  createSession(): Promise<string>;
+  getSession(sessionId: string): Promise<Session | null>;
+  addFile(sessionId: string, name: string, data: Buffer): Promise<string>;
+  getFile(sessionId: string, fileId: string): Promise<StoredFile | null>;
+  listFiles(sessionId: string): Promise<Array<{ id: string; name: string; size: number; lastModified: string }>>;
+  isSessionValid(sessionId: string): Promise<boolean>;
+  cleanup(): Promise<void>;
+  destroy(): Promise<void>;
+  getStats(): Promise<{ sessionCount: number; totalFiles: number; totalSize: number }>;
 }
 
 // =============================================================================

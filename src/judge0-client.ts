@@ -88,7 +88,7 @@ export class Judge0Client {
       const fileBuffers: Array<{ name: string; data: Buffer }> = [];
       
       for (const fileRef of files) {
-        const storedFile = storage.getFile(fileRef.session_id, fileRef.id);
+        const storedFile = await storage.getFile(fileRef.session_id, fileRef.id);
         if (storedFile) {
           fileBuffers.push({
             name: fileRef.name,
@@ -113,21 +113,21 @@ export class Judge0Client {
         { headers: this.getHeaders() }
       );
 
-      return this.translateResponse(response.data, inputFileNames);
+      return await this.translateResponse(response.data, inputFileNames);
     } catch (error) {
-      return this.handleError(error);
+      return await this.handleError(error);
     }
   }
 
   /**
    * Translate Judge0 response to LibreChat format
    */
-  private translateResponse(j0Response: Judge0SubmissionResponse, inputFileNames: string[] = []): ExecResponse {
+  private async translateResponse(j0Response: Judge0SubmissionResponse, inputFileNames: string[] = []): Promise<ExecResponse> {
     const storage = getStorage();
     const statusId = j0Response.status?.id;
     
     // Create a new session for output files
-    const sessionId = storage.createSession();
+    const sessionId = await storage.createSession();
     
     let stdout = '';
     let stderr = '';
@@ -182,7 +182,7 @@ export class Judge0Client {
         const extractedFiles = extractZip(j0Response.post_execution_filesystem, inputFileNames);
         
         for (const file of extractedFiles) {
-          const fileId = storage.addFile(sessionId, file.name, file.data);
+          const fileId = await storage.addFile(sessionId, file.name, file.data);
           outputFiles.push({
             id: fileId,
             name: file.name,
@@ -209,9 +209,9 @@ export class Judge0Client {
   /**
    * Handle errors from Judge0 API
    */
-  private handleError(error: unknown): ExecResponse {
+  private async handleError(error: unknown): Promise<ExecResponse> {
     const storage = getStorage();
-    const sessionId = storage.createSession();
+    const sessionId = await storage.createSession();
 
     if (axios.isAxiosError(error)) {
       const axiosError = error as AxiosError;

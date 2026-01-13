@@ -67,7 +67,7 @@ app.get('/health', async (_req: Request, res: Response) => {
   const judge0 = getJudge0Client();
   
   const judge0Health = await judge0.healthCheck();
-  const storageStats = storage.getStats();
+  const storageStats = await storage.getStats();
 
   res.json({
     status: 'ok',
@@ -143,10 +143,10 @@ app.post('/upload', authenticate, upload.single('file'), async (req: Request, re
     const entityId = req.body.entity_id as string | undefined;
 
     // Create a new session for the upload
-    const sessionId = storage.createSession();
+    const sessionId = await storage.createSession();
     
     // Store the file
-    const fileId = storage.addFile(sessionId, req.file.originalname, req.file.buffer);
+    const fileId = await storage.addFile(sessionId, req.file.originalname, req.file.buffer);
 
     const response: UploadResponse = {
       message: 'success',
@@ -176,7 +176,7 @@ app.post('/upload', authenticate, upload.single('file'), async (req: Request, re
 // GET /files/:session_id - List files in session
 // =============================================================================
 
-app.get('/files/:session_id', authenticate, (req: Request, res: Response) => {
+app.get('/files/:session_id', authenticate, async (req: Request, res: Response) => {
   try {
     const { session_id } = req.params;
     const detail = req.query.detail as string || 'summary';
@@ -184,12 +184,12 @@ app.get('/files/:session_id', authenticate, (req: Request, res: Response) => {
     const storage = getStorage();
     
     // Check if session exists
-    if (!storage.isSessionValid(session_id)) {
+    if (!(await storage.isSessionValid(session_id))) {
       res.status(404).json({ error: 'Session not found or expired' });
       return;
     }
 
-    const files = storage.listFiles(session_id);
+    const files = await storage.listFiles(session_id);
 
     if (detail === 'full') {
       // Full detail format expected by LibreChat
@@ -222,12 +222,12 @@ app.get('/files/:session_id', authenticate, (req: Request, res: Response) => {
 // GET /download/:session_id/:file_id - Download a file
 // =============================================================================
 
-app.get('/download/:session_id/:file_id', authenticate, (req: Request, res: Response) => {
+app.get('/download/:session_id/:file_id', authenticate, async (req: Request, res: Response) => {
   try {
     const { session_id, file_id } = req.params;
 
     const storage = getStorage();
-    const file = storage.getFile(session_id, file_id);
+    const file = await storage.getFile(session_id, file_id);
 
     if (!file) {
       res.status(404).json({ error: 'File not found' });
@@ -292,25 +292,18 @@ const server = app.listen(config.port, config.host, () => {
 });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down...');
+async function shutdown(signal: string): Promise<void> {
+  console.log(`${signal} received, shutting down...`);
   const storage = getStorage();
-  storage.destroy();
+  await storage.destroy();
   server.close(() => {
     console.log('Server closed');
     process.exit(0);
   });
-});
+}
 
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down...');
-  const storage = getStorage();
-  storage.destroy();
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
-});
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 export default app;
 
