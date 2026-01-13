@@ -1,0 +1,8 @@
+node_modules
+dist
+*.md
+.git
+.gitignore
+.env*
+scripts
+redis_data

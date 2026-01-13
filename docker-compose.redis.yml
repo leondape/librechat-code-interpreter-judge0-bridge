@@ -1,0 +1,30 @@
+services:
+  bridge:
+    build: .
+    image: judge0-librechat-bridge
+    env_file:
+      - .env
+    environment:
+      - HOST=0.0.0.0
+      - STORAGE_TYPE=redis
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "${PORT:-3001}:${PORT:-3001}"
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - ./redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  redis_data:
