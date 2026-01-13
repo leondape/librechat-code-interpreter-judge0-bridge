@@ -26,6 +26,7 @@ The easiest way to run the bridge:
 curl -O https://raw.githubusercontent.com/leondape/librechat-code-interpreter-judge0-bridge/main/docker-compose.yml
 # OR Redis compose file for persistent TTL storage 
 curl -O https://raw.githubusercontent.com/leondape/librechat-code-interpreter-judge0-bridge/main/docker-compose.redis.yml
+
 # 2. Configure .env.example
 curl -O https://raw.githubusercontent.com/leondape/librechat-code-interpreter-judge0-bridge/main/.env.example
 
