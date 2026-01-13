@@ -1,7 +1,7 @@
 # Judge0-LibreChat Bridge
 
 A stateful proxy service that bridges LibreChat's Code Interpreter API with Judge0's stateless execution API.  
-This is work in Progress but fully works. As far as I see it the bridge brings full feature parity to LibreChat Code interpreter API. Redis is very wip and not yet tested.
+As far as I see it the bridge brings full feature parity to LibreChat Code interpreter API.
 
 ## Overview
 
