@@ -14,43 +14,48 @@ LibreChat expects a stateful code execution API with persistent sessions and fil
 
 ## Prerequisites
 
-- Node.js 18+
+- Docker (recommended) OR Node.js 18+
 - Judge0 API >=v1.14 (see [File Output Support](#file-output-support) for limitations)
 
-## Quick Start
+## Quick Start (Docker)
 
-### 1. Install Dependencies
+The easiest way to run the bridge:
 
 ```bash
-npm install
+# 1. Download the compose file 
+curl -O https://raw.githubusercontent.com/leondape/librechat-code-interpreter-judge0-bridge/main/docker-compose.yml
+# OR Redis compose file for persistent TTL storage 
+curl -O https://raw.githubusercontent.com/leondape/librechat-code-interpreter-judge0-bridge/main/docker-compose.redis.yml
+# 2. Configure .env.example
+curl -O https://raw.githubusercontent.com/leondape/librechat-code-interpreter-judge0-bridge/main/.env.example
+
+# 3. Configure environment
+mv .env.example .env
+# Edit .env with your Judge0 API key and other settings
+
+# 4. Start the bridge
+docker compose up -d
+# OR when using redis
+docker compose -f docker-compose.redis.yml up -d
 ```
 
-### 2. Configure Environment
+## Quick Start (Node.js)
+
+If you prefer running without Docker:
 
 ```bash
+# 1. Clone and install
+git clone https://github.com/leondape/librechat-code-interpreter-judge0-bridge.git
+cd librechat-code-interpreter-judge0-bridge
+npm install
+
+# 2. Configure environment
 cp .env.example .env
 # Edit .env as needed
-```
 
-### 3. Start the Bridge
-
-```bash
-# Development (with hot reload)
-npm run dev
-
-# Production
+# 3. Start the bridge
 npm run build
 npm start
-```
-
-### 4. Test the Bridge
-
-```bash
-# Using TypeScript test suite
-npm run test
-
-# Or using curl
-./scripts/test-bridge.sh
 ```
 
 ## Configuration
@@ -217,6 +222,18 @@ npm run test
 
 # Quick curl tests
 ./scripts/test-bridge.sh
+```
+
+### Building Docker Image Locally
+
+For contributors who want to build the Docker image locally instead of pulling from the registry:
+
+```bash
+# Memory storage
+docker compose -f docker-compose.dev.yml up -d
+
+# With Redis
+docker compose -f docker-compose.dev.redis.yml up -d
 ```
 
 ## Security Notes

@@ -1,8 +1,7 @@
-# Default compose file with Redis - pulls pre-built image from GHCR
-# For local development/building, use docker-compose.dev.redis.yml instead
 services:
   bridge:
-    image: ghcr.io/leondape/librechat-code-interpreter-judge0-bridge:latest
+    build: .
+    image: judge0-librechat-bridge
     env_file:
       - .env
     environment:
@@ -19,7 +18,7 @@ services:
   redis:
     image: redis:7-alpine
     volumes:
-      - redis_data:/data
+      - ./redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
